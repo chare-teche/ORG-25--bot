@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🎹 ORG 25 PRO - Telegram Mini App & Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body {
+            background: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #0088cc; border-radius: 10px; }
+
+        /* Telegram App Header Style */
+        .tg-header {
+            background: #17212b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0088cc;
+            margin-bottom: 12px;
+        }
+        .tg-logo h1 { font-size: 1rem; color: #51b6ff; display: flex; align-items: center; gap: 6px; }
+        .tg-logo p { font-size: 0.55rem; color: #879baf; }
+        
+        .tg-badge {
+            background: #0088cc;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Language Switcher Bar */
+        .lang-bar {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            padding-bottom: 4px;
+        }
+        .lang-bar::-webkit-scrollbar { display: none; }
+        .lang-btn {
+            background: #1f2937;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 16px;
+            color: #879baf;
+            font-size: 0.65rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .lang-btn.active { background: #0088cc; color: white; font-weight: bold; }
+
+        /* Chat / Bot Screen Container */
+        .bot-container {
+            flex: 1;
+            background: #17212b;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            border: 1px solid #232e3c;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+            max-height: 55vh;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .bot-msg {
+            background: #2b3b4e;
+            color: #fff;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+        .user-msg {
+            background: #2b5278;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        /* Bot Inline Keyboard Buttons inside chat */
+        .inline-keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .bot-btn {
+            background: #242f3d;
+            border: 1px solid #0088cc;
+            color: #51b6ff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .bot-btn:hover { background: #0088cc; color: #fff; }
+
+        /* Bottom Command Input Bar */
+        .bot-input-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #232e3c;
+        }
+        .bot-input {
+            flex: 1;
+            background: #212f3d;
+            border: 1px solid #2b3b4e;
+            padding: 10px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            outline: none;
+        }
+        .send-btn {
+            background: #0088cc;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        /* Quick Command Chips */
+        .quick-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            margin-top: 8px;
+            padding-bottom: 2px;
+        }
+        .quick-chips::-webkit-scrollbar { display: none; }
+        .chip {
+            background: #242f3d;
+            color: #879baf;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .chip:hover { color: #fff; background: #2b3b4e; }
+
+        /* Modal screens for bot forms */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #17212b;
+            padding: 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 380px;
+            border: 1px solid #2b3b4e;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            background: #212f3d;
+            border: 1px solid #2b3b4e;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.8rem;
+        }
+        .btn-main {
+            background: #0088cc;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            display: none;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Telegram Header -->
+    <div class="tg-header">
+        <div class="tg-logo">
+            <h1>🤖 @ORG25_PRO_BOT</h1>
+            <p id="botStatus">online &bull; Ethiopia's #1 Keyboard Bot</p>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <div class="tg-badge" onclick="openWallet()"><i class="fas fa-wallet"></i> <span id="headerWallet">0</span> ETB</div>
+            <div class="tg-badge" style="background:#2b3b4e;" onclick="openAdmin()" id="adminBtn" style="display:none;">Admin</div>
+        </div>
+    </div>
+
+    <!-- Language Selector Bar -->
+    <div class="lang-bar">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">🇬🇧 English</button>
+        <button class="lang-btn" data-lang="am" onclick="setLanguage('am')">🇪🇹 አማርኛ</button>
+        <button class="lang-btn" data-lang="om" onclick="setLanguage('om')">🇪🇹 Oromoo</button>
+        <button class="lang-btn" data-lang="ti" onclick="setLanguage('ti')">🇪🇷 ትግርኛ</button>
+        <button class="lang-btn" data-lang="so" onclick="setLanguage('so')">🇸🇴 Soomaali</button>
+    </div>
+
+    <!-- Main Bot Interface (Chat Box) -->
+    <div class="bot-container">
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages injected dynamically -->
+        </div>
+
+        <div>
+            <div class="quick-chips">
+                <button class="chip" onclick="handleCommand('/start')">▶️ /start</button>
+                <button class="chip" onclick="handleCommand('/products')">🎹 /products</button>
+                <button class="chip" onclick="handleCommand('/samples')">🎁 /samples</button>
+                <button class="chip" onclick="handleCommand('/wallet')">💰 /wallet</button>
+                <button class="chip" onclick="handleCommand('/support')">📞 /support</button>
+                <button class="chip" onclick="handleCommand('/admin')">🔧 /admin</button>
+            </div>
+            <div class="bot-input-bar">
+                <input type="text" id="userInput" class="bot-input" placeholder="Type a command or message..." onkeypress="if(event.key === 'Enter') sendUserMessage()">
+                <button class="send-btn" onclick="sendUserMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment & Receipt Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#51b6ff; margin-bottom:10px;"><i class="fas fa-credit-card"></i> Bank Transfer Payment</h3>
+            <p style="font-size:0.75rem; color:#879baf; margin-bottom:10px;" id="payInstructions">Transfer exact amount to one of our accounts below:</p>
+            <div style="background:#212f3d; padding:10px; border-radius:8px; font-size:0.75rem; margin-bottom:10px;">
+                <div>🏦 <strong>CBE:</strong> 1000718384552</div>
+                <div>📱 <strong>Telebirr:</strong> 0981764920</div>
+                <div>👤 <strong>Name:</strong> Chare</div>
+            </div>
+            <input type="text" id="modalTxId" placeholder="🔢 Enter Transaction ID (TxID)">
+            <input type="file" id="modalScreenshot" accept="image/*" style="margin:6px 0;">
+            <button class="btn-main" onclick="submitPaymentProof()">✅ Submit Payment Proof</button>
+            <button class="btn-main" onclick="closeModal('paymentModal')" style="background:#2b3b4e; margin-top:6px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="max-height:85vh; overflow-y:auto;">
+            <h3 style="color:#51b6ff; margin-bottom:10px;"><i class="fas fa-tools"></i> Bot Admin Panel</h3>
+            <div id="adminContent"></div>
+            <button class="btn-main" onclick="closeModal('adminModal')" style="background:#2b3b4e; margin-top:10px;">Close Panel</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ================= BOT STATE & STORAGE =================
+        let currentLang = 'en';
+        let currentUser = { id: 999111, username: 'chare_user', wallet: 150, hasPaidPurchase: true, isAdmin: true };
+        let products = [
+            { id: 1, name: "🎹 ORG 25 JPS SET", price: 250, desc: "Professional Ethiopian Keyboard Style Set", fileData: "data:application/zip;base64,UEsDBBQAAAAIA..." },
+            { id: 2, name: "🎼 YAMAHA JPS SET", price: 300, desc: "High quality live rhythm set for Yamaha", fileData: "data:application/zip;base64,UEsDBBQAAAAIA..." }
+        ];
+        let samples = [
+            { id: 1, name: "🎁 ORG 25 Free Demo Style", fileData: "data:application/zip;base64,UEsDBBQAAAAIA..." }
+        ];
+        let purchases = [
+            { id: 101, userId: 999111, username: 'chare_user', productName: "🎹 ORG 25 JPS SET", amount: 250, txId: "CBE-991203", status: "approved" }
+        ];
+        let messages = [];
+        let activeCheckoutProduct = null;
+
+        const botDict = {
+            en: {
+                welcome: "🤖 *Welcome to ORG 25 PRO Bot!*\n\nEthiopia's #1 Keyboard Style & Rhythm Bot 🇪🇹\n\nChoose an option below or type a command:",
+                productsTitle: "🎹 *Available Keyboard Styles:*",
+                samplesTitle: "🎁 *Free Demo Samples:*",
+                walletTitle: "💰 *Your Bot Wallet Balance:*",
+                supportText: "📞 *Official Support & Bank Accounts:*\n\n• *CBE:* `1000718384552` (Name: Chare)\n• *Telebirr:* `0981764920` (Name: Chare)\n• *Telegram:* @CHAREORG25styles",
+                unknown: "❓ Unknown command. Type /start to see the menu.",
+                buyBtn: "🛒 Buy Now",
+                downloadBtn: "📥 Download File",
+                uploadReceipt: "📤 Submit Payment & Receipt"
+            },
+            am: {
+                welcome: "🤖 *እንኳን ወደ ቻርሻ ኦርጋን ቦት በደህና መጡ!*\\n\\nየኢትዮጵያ ቁጥር 1 የቁልፍ ሰሌዳ ዘይቤዎች ቦት 🇪🇹\\n\\nከታች ካሉት አማራጮች አንዱን ይምረጡ:",
+                productsTitle: "🎹 *ያሉ የኦርጋን ዘይቤዎች (Styles):*",
+                samplesTitle: "🎁 *ነፃ የናሙና ስብስቦች (Samples):*",
+                walletTitle: "💰 *የቦርሳዎ ቀሪ ሂሳብ:*",
+                supportText: "📞 *ኦፊሻል የድጋፍ እና የባንክ መረጃዎች:*\\n\\n• *ንግድ ባንክ (CBE):* `1000718384552` (ስም: ጫሬ)\\n• *ቴሌብር (Telebirr):* `0981764920` (ስም: ጫሬ)",
+                unknown: "❓ ትዕዛዙ አልታወቀም። ምናሌውን ለማየት /start ይጻፉ።",
+                buyBtn: "🛒 ግዛ",
+                downloadBtn: "📥 ፋይል አውርድ",
+                uploadReceipt: "📤 ክፍያ እና ደረሰኝ ላክ"
+            },
+            om: {
+                welcome: "🤖 *Gabaa Bot ORG 25 PRO nagaan dhuftan!*\\n\\nMeeshaalee tapha kiborduun Itiyoophiyaa 🇪🇹",
+                productsTitle: "🎹 *Meeshaalee Jiran:*",
+                samplesTitle: "🎁 *Fakkeenya Bilisaa:*",
+                walletTitle: "💰 *Qabeenya Keessan:*",
+                supportText: "📞 *Gargaarsa:*\\n• *CBE:* `1000718384552` (Chare)",
+                unknown: "❓ Ajajni hin beekamne. /start fayyadami.",
+                buyBtn: "🛒 Biti",
+                downloadBtn: "📥 Buufadhu",
+                uploadReceipt: "📤 Ragaa Kaffaltii Ergi"
+            }
+        };
+        for (let l of ['ti', 'so']) botDict[l] = { ...botDict.en };
+
+        function t(key) { return botDict[currentLang]?.[key] || botDict['en'][key] || key; }
+
+        function showToast(msg) {
+            let t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2500);
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => {
+                b.classList.remove('active');
+                if (b.dataset.lang === lang) b.classList.add('active');
+            });
+            showToast('🌐 Language updated');
+            handleCommand('/start');
+        }
+
+        // ================= BOT CHAT ENGINE =================
+        function appendMessage(text, sender = 'bot', inlineKeyboard = null) {
+            messages.push({ text, sender, inlineKeyboard });
+            renderChat();
+        }
+
+        function renderChat() {
+            let container = document.getElementById('chatMessages');
+            container.innerHTML = messages.map(m => {
+                let kbHtml = '';
+                if (m.inlineKeyboard && m.inlineKeyboard.length > 0) {
+                    kbHtml = `<div class="inline-keyboard">` + m.inlineKeyboard.map(row => 
+                        row.map(btn => `<button class="bot-btn" onclick="${btn.action}"><i class="${btn.icon || 'fas fa-chevron-right'}"></i> ${btn.text}</button>`).join('')
+                    ).join('') + `</div>`;
+                }
+                return `<div class="message ${m.sender === 'bot' ? 'bot-msg' : 'user-msg'}">
+                    ${m.text.replace(/\n/g, '<br>')}
+                    ${kbHtml}
+                </div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+            document.getElementById('headerWallet').innerText = currentUser.wallet.toFixed(0);
+            if (currentUser.isAdmin) document.getElementById('adminBtn').style.display = 'block';
+        }
+
+        function sendUserMessage() {
+            let input = document.getElementById('userInput');
+            let text = input.value.trim();
+            if (!text) return;
+            appendMessage(text, 'user');
+            input.value = '';
+            setTimeout(() => { handleCommand(text); }, 300);
+        }
+
+        function handleCommand(cmd) {
+            let text = cmd.toLowerCase();
+            if (text === '/start' || text === 'start') {
+                appendMessage(t('welcome'), 'bot', [
+                    [{ text: "🎹 Browse Products (/products)", icon: "fas fa-music", action: "handleCommand('/products')" }],
+                    [{ text: "🎁 Free Samples (/samples)", icon: "fas fa-gift", action: "handleCommand('/samples')" }],
+                    [{ text: "💰 My Wallet (/wallet)", icon: "fas fa-wallet", action: "handleCommand('/wallet')" }],
+                    [{ text: "📞 Support & Banks (/support)", icon: "fas fa-headset", action: "handleCommand('/support')" }]
+                ]);
+            } else if (text === '/products' || text === 'products') {
+                let keyboard = products.map(p => {
+                    let hasBought = purchases.find(pu => pu.userId === currentUser.id && pu.productId === p.id && pu.status === 'approved');
+                    let btnText = hasBought ? `📥 Download ${p.name}` : `🛒 Buy ${p.name} (${p.price} ETB)`;
+                    let action = hasBought ? `downloadProductFile(${p.id})` : `startCheckout(${p.id})`;
+                    return [{ text: btnText, icon: hasBought ? "fas fa-download" : "fas fa-shopping-cart", action }];
+                });
+                appendMessage(t('productsTitle'), 'bot', keyboard);
+            } else if (text === '/samples' || text === 'samples') {
+                let keyboard = samples.map(s => [{ text: `🎁 Download ${s.name}`, icon: "fas fa-download", action: `downloadSampleFile(${s.id})` }]);
+                appendMessage(t('samplesTitle'), 'bot', keyboard);
+            } else if (text === '/wallet' || text === 'wallet') {
+                let msg = `${t('walletTitle')} *${currentUser.wallet.toFixed(2)} ETB*\n\nYour Referral Link:\n\`https://t.me/ORG25_PRO_BOT?start=ref${currentUser.id}\``;
+                appendMessage(msg, 'bot', [
+                    [{ text: "💸 Request Withdrawal", icon: "fas fa-money-bill-wave", action: "requestWithdrawal()" }]
+                ]);
+            } else if (text === '/support' || text === 'support') {
+                appendMessage(t('supportText'), 'bot');
+            } else if (text === '/admin' || text === 'admin') {
+                if (!currentUser.isAdmin) {
+                    appendMessage("⚠️ Access denied. Admin credentials required.", 'bot');
+                } else {
+                    openAdmin();
+                }
+            } else {
+                appendMessage(t('unknown'), 'bot');
+            }
+        }
+
+        // ================= TRANSACTIONS & FILES =================
+        function startCheckout(productId) {
+            let p = products.find(prod => prod.id === productId);
+            if (!p) return;
+            activeCheckoutProduct = p;
+            document.getElementById('payInstructions').innerText = `Transfer ${p.price} ETB for "${p.name}" to one of our accounts below:`;
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        function submitPaymentProof() {
+            let txId = document.getElementById('modalTxId').value.trim();
+            if (!txId) { showToast('❌ Enter Transaction ID'); return; }
+
+            purchases.push({
+                id: Date.now(),
+                userId: currentUser.id,
+                username: currentUser.username,
+                productId: activeCheckoutProduct.id,
+                productName: activeCheckoutProduct.name,
+                amount: activeCheckoutProduct.price,
+                txId: txId,
+                status: 'approved' // Auto-approved for instant bot experience
+            });
+
+            currentUser.hasPaidPurchase = true;
+            closeModal('paymentModal');
+            document.getElementById('modalTxId').value = '';
+            
+            appendMessage(`✅ Payment verified (TxID: ${txId})!\nYour product "${activeCheckoutProduct.name}" is now unlocked.`, 'bot', [
+                [{ text: `📥 Download ${activeCheckoutProduct.name}`, icon: "fas fa-download", action: `downloadProductFile(${activeCheckoutProduct.id})` }]
+            ]);
+            showToast('✅ Payment successful & verified!');
+        }
+
+        function downloadProductFile(productId) {
+            let p = products.find(prod => prod.id === productId);
+            if (!p) return;
+            triggerDownload(p.fileData, p.name + '.zip');
+        }
+
+        function downloadSampleFile(sampleId) {
+            let s = samples.find(samp => samp.id === sampleId);
+            if (!s) return;
+            triggerDownload(s.fileData, s.name + '.zip');
+        }
+
+        function triggerDownload(dataUrl, filename) {
+            let a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('📥 Downloading file...');
+        }
+
+        function openWallet() { handleCommand('/wallet'); }
+
+        function requestWithdrawal() {
+            if (!currentUser.hasPaidPurchase) { showToast('⚠️ Make first purchase to withdraw!'); return; }
+            if (currentUser.wallet < 100) { showToast('⚠️ Minimum 100 ETB required'); return; }
+            let amt = currentUser.wallet;
+            currentUser.wallet = 0;
+            appendMessage(`✅ Withdrawal request of ${amt} ETB submitted successfully! Admin will send via CBE/Telebirr.`, 'bot');
+            renderChat();
+        }
+
+        // ================= ADMIN PANEL =================
+        function openAdmin() {
+            if (!currentUser.isAdmin) return;
+            let totalSales = purchases.filter(p => p.status === 'approved').reduce((s, p) => s + p.amount, 0);
+            let content = `
+                <p style="font-size:0.75rem; color:#879baf; margin-bottom:10px;">Total Revenue: <strong style="color:#22c55e;">${totalSales} ETB</strong></p>
+                <div style="background:#212f3d; padding:10px; border-radius:8px; margin-bottom:10px;">
+                    <h4 style="font-size:0.8rem; margin-bottom:6px;">Upload New Product</h4>
+                    <input type="text" id="admName" placeholder="Product Name">
+                    <input type="number" id="admPrice" placeholder="Price (ETB)">
+                    <button class="btn-main" onclick="adminAddProduct()">Upload Product</button>
+                </div>
+            `;
+            document.getElementById('adminContent').innerHTML = content;
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function adminAddProduct() {
+            let name = document.getElementById('admName').value.trim();
+            let price = parseFloat(document.getElementById('admPrice').value);
+            if (!name || isNaN(price)) { showToast('❌ Fill all fields'); return; }
+            products.push({ id: Date.now(), name, price, desc: "New style set", fileData: "data:application/zip;base64,UEsDBBQAAAAIA..." });
+            closeModal('adminModal');
+            showToast('✅ Product uploaded successfully!');
+            handleCommand('/products');
+        }
+
+        // Initialize Bot on Load
+        window.onload = function() {
+            handleCommand('/start');
+        };
+    </script>
+</body>
+</html>
